@@ -4,7 +4,6 @@
 [![Jenkins](https://img.shields.io/badge/CI-Jenkins-blue.svg)]()
 [![AWS EC2](https://img.shields.io/badge/Deployed%20on-AWS%20EC2-orange.svg)]()
 [![Node.js](https://img.shields.io/badge/Runtime-Node.js-green.svg)]()
-[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)]()
 
 This repository demonstrates a complete CI/CD pipeline for a Node.js application using **Jenkins**, **GitHub Webhooks**, and **AWS EC2**.  
 Each code push to GitHub automatically triggers Jenkins to build, test, and deploy the latest version to an EC2 instance.
@@ -12,6 +11,7 @@ Each code push to GitHub automatically triggers Jenkins to build, test, and depl
 ---
 
 ## 1. Overview
+![AWS Instances](img/overvieww.png)
 
 ### Technologies Used
 - **Node.js (Express.js)** — Backend application  
@@ -59,7 +59,7 @@ From Jenkins Dashboard → **New Item → Pipeline → OK**
 - **Pipeline Name:** `node-app-deploy`  
 - **Type:** Pipeline  
 - **SCM:** Git  
-- **Repository URL:** `https://github.com/<your-username>/Book-App-CI-CD.git`  
+- **Repository URL:** `https://github.com/RajAhire-1/Book-App-CI-CD.git`  
 - **Branch:** `main`
 
 **Pipeline Setup Screenshot:**
@@ -75,7 +75,7 @@ Set up a webhook in GitHub to automatically trigger Jenkins on every code push.
 **Steps:**
 1. Go to **Repository → Settings → Webhooks**  
 2. Click **Add Webhook**  
-3. **Payload URL:** `http://<jenkins-server-ip>:8080/github-webhook/`  
+3. **Payload URL:** `http://126.23.54.15:8080/github-webhook/`  
 4. **Content Type:** `application/json`  
 5. Trigger: “Just the push event”  
 6. Save  
@@ -172,7 +172,7 @@ Each time code is pushed to GitHub, Jenkins automatically triggers a new build a
 Once deployed, the application runs at:
 
 ```
-http://<EC2-PUBLIC-IP>:3000
+http://129.53.46.25:3000
 ```
 
 **Homepage View:**
