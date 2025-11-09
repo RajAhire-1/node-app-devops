@@ -1,76 +1,71 @@
 pipeline {
-    agent any
+  agent {
+    docker {
+      image 'node:18-bullseye'
+      args  '--network host'
+    }
+  }
 
-    environment {
-        // 🧠 --- Configuration variables ---
-        SERVER_IP      = '172.31.7.249'            // your EC2 server
-        SSH_CREDENTIAL = 'node-app-key'            // Jenkins SSH key ID
-        REPO_URL       = 'https://github.com/RajAhire-1/node-app-devops.git'
-        BRANCH         = 'main'
-        REMOTE_USER    = 'ubuntu'
-        REMOTE_PATH    = '/home/ubuntu/node-app'
+  environment {
+    SERVER_IP      = '172.31.7.249'
+    SSH_CREDENTIAL = 'node-app-key'
+    REPO_URL       = 'https://github.com/RajAhire-1/node-app-devops.git'
+    BRANCH         = 'main'
+    REMOTE_USER    = 'ubuntu'
+    REMOTE_PATH    = '/home/ubuntu/node-app'
+    NODE_ENV       = 'production'
+    APP_NAME       = 'cinelite-app'
+  }
 
-        // optional customizations
-        NODE_ENV       = 'production'
-        APP_NAME       = 'cinelite-app'
+  stages {
+    stage('Checkout Code') {
+      steps {
+        echo '📦 Cloning repository...'
+        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], userRemoteConfigs: [[url: "${REPO_URL}"]]])
+      }
     }
 
-    stages {
-
-        stage('Checkout Code') {
-            steps {
-                echo '📦 Cloning repository...'
-                git branch: "${BRANCH}", url: "${REPO_URL}"
-            }
-        }
-
-        stage('Install Dependencies (Local Test)') {
-            steps {
-                echo '📦 Installing Node dependencies (for lint/test)...'
-                sh 'npm install'
-            }
-        }
-
-        stage('Run Lint / Build Checks') {
-            steps {
-                echo '🧪 Running code checks...'
-                // (optional) Add real commands if you have ESLint / tests
-                sh 'echo "No tests defined. Skipping..."'
-            }
-        }
-
-        stage('Deploy to EC2') {
-            steps {
-                echo "🚀 Uploading and deploying app to ${SERVER_IP}"
-                sshagent([SSH_CREDENTIAL]) {
-                    sh """
-                        # create remote directory
-                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} 'mkdir -p ${REMOTE_PATH}'
-
-                        # copy project files
-                        scp -o StrictHostKeyChecking=no -r * ${REMOTE_USER}@${SERVER_IP}:${REMOTE_PATH}/
-
-                        # install dependencies & restart app
-                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} '
-                            cd ${REMOTE_PATH} &&
-                            npm install --omit=dev &&
-                            pm2 start start.js --name ${APP_NAME} || pm2 restart ${APP_NAME}
-                        '
-                    """
-                }
-            }
-        }
+    stage('Agent Diagnostics') {
+      steps {
+        sh 'echo "Node:"; node -v || true'
+        sh 'echo "npm:"; npm -v || true'
+        sh 'echo "pwd: $(pwd)"'
+      }
     }
 
-    post {
-        success {
-            echo '✅ Application deployed successfully to EC2!'
-        }
-        failure {
-            echo '❌ Deployment failed. Check Jenkins logs.'
-        }
-        always {
-            echo '📜 Pipeline completed.'
-        }
+    stage('Install Dependencies') {
+      steps {
+        echo '📦 Installing dependencies inside container...'
+        sh 'npm ci || npm install'
+      }
     }
+
+    stage('Run Checks') {
+      steps {
+        echo '🧪 No tests configured — skipping (add your tests here).'
+      }
+    }
+
+    stage('Deploy to EC2') {
+      steps {
+        sshagent([SSH_CREDENTIAL]) {
+          sh """
+            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} 'mkdir -p ${REMOTE_PATH}'
+            scp -o StrictHostKeyChecking=no -r * ${REMOTE_USER}@${SERVER_IP}:${REMOTE_PATH}/
+            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} '
+              cd ${REMOTE_PATH} &&
+              npm install --omit=dev &&
+              pm2 start start.js --name ${APP_NAME} || pm2 restart ${APP_NAME}
+            '
+          """
+        }
+      }
+    }
+  }
+
+  post {
+    success { echo '✅ Deployed successfully' }
+    failure { echo '❌ Deployment failed — check logs' }
+    always  { echo '📜 Pipeline finished' }
+  }
 }
