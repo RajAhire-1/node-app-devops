@@ -1,0 +1,64 @@
+:root{
+  --bg:#0f1724;
+  --card:#111827;
+  --muted:#9aa4b2;
+  --accent:#06b6d4;
+  --accent-2:#f59e0b;
+  --radius:12px;
+}
+body{
+  margin:0;
+  font-family:"Inter",sans-serif;
+  background:linear-gradient(180deg,var(--bg),#071028);
+  color:#e6eef6;
+}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem;}
+
+.site-header{
+  position:sticky;top:0;
+  background:rgba(7,10,20,0.6);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.logo{color:var(--accent);margin:0;}
+.slogan{color:var(--muted);margin:0;font-size:0.9rem;}
+.site-header .wrap{display:flex;align-items:center;justify-content:space-between;}
+input[type="search"]{
+  background:rgba(255,255,255,0.05);
+  border:none;
+  padding:0.5rem 1rem;
+  border-radius:8px;
+  color:white;
+}
+
+/* layout */
+.main-grid{display:grid;grid-template-columns:260px 1fr;gap:1.5rem;margin-top:2rem;}
+.sidebar{background:rgba(255,255,255,0.05);padding:1rem;border-radius:var(--radius);}
+.sidebar h3{margin-top:0;color:var(--accent);}
+.sidebar label{display:block;margin-bottom:1rem;}
+.sidebar select,.sidebar input[type="range"]{width:100%;margin-top:0.3rem;}
+.btn{cursor:pointer;padding:0.5rem 1rem;border:none;border-radius:6px;}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#000;font-weight:600;}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;}
+.card{
+  background:rgba(255,255,255,0.05);
+  padding:1rem;
+  border-radius:var(--radius);
+  transition:transform 0.2s ease;
+}
+.card:hover{transform:translateY(-6px);}
+.thumb{height:100px;border-radius:8px;color:#021124;font-weight:700;display:flex;align-items:end;padding:0.6rem;}
+.meta{display:flex;justify-content:space-between;font-size:0.85rem;color:var(--muted);}
+.tag{background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;font-size:0.75rem;}
+
+/* modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);}
+.modal[aria-hidden="false"]{display:flex;}
+.modal-card{background:#111827;padding:1.2rem;border-radius:var(--radius);width:90%;max-width:600px;position:relative;}
+.modal-close{position:absolute;top:8px;right:10px;background:none;border:none;color:#999;font-size:1.4rem;cursor:pointer;}
+.modal h2{margin-top:0;}
+
+/* footer */
+.site-footer{border-top:1px solid rgba(255,255,255,0.05);margin-top:2rem;padding:1rem 0;text-align:center;color:var(--muted);}

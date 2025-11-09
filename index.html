@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CineLite — Movies Simplified</title>
+  <link rel="stylesheet" href="/app.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <h1 class="logo">CineLite</h1>
+        <p class="slogan">Fast • Clean • Friendly</p>
+      </div>
+      <input id="search" type="search" placeholder="Search movies..." />
+    </div>
+  </header>
+
+  <main class="wrap main-grid">
+    <aside class="sidebar" id="sidebar">
+      <h3>Filters</h3>
+      <label>Genre
+        <select id="genreSelect">
+          <option value="">All</option>
+          <option>Drama</option>
+          <option>Sci-Fi</option>
+          <option>Family</option>
+          <option>Thriller</option>
+          <option>Adventure</option>
+        </select>
+      </label>
+      <label>Min Score
+        <input id="minScore" type="range" min="0" max="10" step="0.1" value="0" />
+        <div class="range-value"><span id="scoreVal">0</span>/10</div>
+      </label>
+      <button id="applyFilters" class="btn primary">Apply</button>
+    </aside>
+
+    <section class="content">
+      <h2>Now Trending</h2>
+      <div id="movieGrid" class="grid"></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button id="closeModal" class="modal-close">&times;</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>© <span id="year"></span> CineLite</span>
+      <small>Made with ❤️ by OpenAI demo</small>
+    </div>
+  </footer>
+
+  <script src="/main.js"></script>
+</body>
+</html>

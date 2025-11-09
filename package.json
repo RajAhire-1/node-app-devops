@@ -1,11 +1,16 @@
 {
-  "name": "jenkins-node-app",
+  "name": "cinelite",
   "version": "1.0.0",
-  "main": "app.js",
+  "description": "CineLite - A lightweight movie ticket website",
+  "main": "start.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node start.js",
+    "dev": "nodemon start.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }
