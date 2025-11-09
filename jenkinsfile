@@ -8,53 +8,39 @@ pipeline {
     BRANCH         = 'main'
     REMOTE_USER    = 'ubuntu'
     REMOTE_PATH    = '/home/ubuntu/node-app'
-    NODE_IMAGE     = 'node:18-bullseye'
     APP_NAME       = 'cinelite-app'
   }
 
   stages {
     stage('Checkout Code') {
       steps {
-        echo '📦 Cloning repository...'
-        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], userRemoteConfigs: [[url: "${REPO_URL}"]]])
+        git branch: "${BRANCH}", url: "${REPO_URL}"
       }
     }
 
-    stage('Agent Diagnostics') {
+    stage('Install (local)') {
       steps {
-        sh 'echo "=== Agent info ==="'
-        sh 'whoami || true'
-        sh 'id || true'
-        sh 'git --version || true'
-        sh 'docker --version || echo "docker CLI not found"'
+        echo "Install deps on agent (optional) ..."
+        sh 'echo "Skipping local install (build on remote). "'
       }
     }
 
-    stage('Install Dependencies (in Docker)') {
+    stage('Deploy to EC2 (tar over SSH)') {
       steps {
-        echo "📦 Installing dependencies using Docker image ${NODE_IMAGE}"
-        // run npm install inside a temporary container; mounts the workspace
-        sh '''
-          docker run --rm -v "$PWD":/workspace -w /workspace ${NODE_IMAGE} /bin/bash -lc "npm ci || npm install"
-        '''
-      }
-    }
-
-    stage('Run Lint / Build Checks') {
-      steps {
-        echo '🧪 Running checks (customize as needed)'
-        sh '''
-          docker run --rm -v "$PWD":/workspace -w /workspace ${NODE_IMAGE} /bin/bash -lc "echo No tests defined"
-        '''
-      }
-    }
-
-    stage('Deploy to EC2') {
-      steps {
-        sshagent([env.SSH_CREDENTIAL]) {
+        sshagent([SSH_CREDENTIAL]) {
           sh """
-            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} 'mkdir -p ${REMOTE_PATH}'
-            scp -o StrictHostKeyChecking=no -r * ${REMOTE_USER}@${SERVER_IP}:${REMOTE_PATH}/
+            # prepare remote temp dir
+            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} 'rm -rf ${REMOTE_PATH}.tmp && mkdir -p ${REMOTE_PATH}.tmp'
+            # stream compressed archive into remote temp dir
+            tar -czf - . | ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} 'tar -xzf - -C ${REMOTE_PATH}.tmp'
+            # atomic swap
+            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} '
+              rm -rf ${REMOTE_PATH}.backup || true &&
+              mv ${REMOTE_PATH} ${REMOTE_PATH}.backup || true &&
+              mv ${REMOTE_PATH}.tmp ${REMOTE_PATH} &&
+              chmod -R 755 ${REMOTE_PATH}
+            '
+            # install remote deps & restart using pm2
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} '
               cd ${REMOTE_PATH} &&
               npm install --omit=dev &&
@@ -67,8 +53,8 @@ pipeline {
   }
 
   post {
-    success { echo '✅ Deploy succeeded' }
-    failure { echo '❌ Deploy failed — check logs' }
+    success { echo '✅ Deployment succeeded' }
+    failure { echo '❌ Deployment failed — check logs' }
     always  { echo '📜 Pipeline finished' }
   }
 }

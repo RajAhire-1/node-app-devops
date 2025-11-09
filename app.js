@@ -8,13 +8,73 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- Movie data ---
+// --- Movie data (with posterUrl pointing to Unsplash images) ---
 const movies = [
-  { id: 101, title: "CineWave", genre: "Drama", length: 112, score: 7.4, lang: "Hindi", year: 2023, color: "#5063f0", tagline: "When waves meet hearts", director: "A. Rao"},
-  { id: 102, title: "Night Circuit", genre: "Sci-Fi", length: 129, score: 8.1, lang: "English", year: 2024, color: "#ff8a65", tagline: "City never sleeps", director: "M. Sen"},
-  { id: 103, title: "The Lost Kite", genre: "Family", length: 95, score: 7.9, lang: "Hindi", year: 2022, color: "#66bb6a", tagline: "Small joys, big skies", director: "R. Kapoor"},
-  { id: 104, title: "Echo Chamber", genre: "Thriller", length: 140, score: 8.6, lang: "English", year: 2024, color: "#ab47bc", tagline: "Every secret echoes", director: "S. Iyer"},
-  { id: 105, title: "Spice Route", genre: "Adventure", length: 121, score: 7.8, lang: "Malayalam", year: 2021, color: "#ffca28", tagline: "Sail beyond maps", director: "P. Das"},
+  {
+    id: 101,
+    title: "CineWave",
+    genre: "Drama",
+    length: 112,
+    score: 7.4,
+    lang: "Hindi",
+    year: 2023,
+    color: "#5063f0",
+    tagline: "When waves meet hearts",
+    director: "A. Rao",
+    posterUrl: "https://images.unsplash.com/photo-1517604931442-7d3b2a9f5b2a?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 102,
+    title: "Night Circuit",
+    genre: "Sci-Fi",
+    length: 129,
+    score: 8.1,
+    lang: "English",
+    year: 2024,
+    color: "#ff8a65",
+    tagline: "City never sleeps",
+    director: "M. Sen",
+    posterUrl: "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 103,
+    title: "The Lost Kite",
+    genre: "Family",
+    length: 95,
+    score: 7.9,
+    lang: "Hindi",
+    year: 2022,
+    color: "#66bb6a",
+    tagline: "Small joys, big skies",
+    director: "R. Kapoor",
+    posterUrl: "https://images.unsplash.com/photo-1507149833265-60c372daea22?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 104,
+    title: "Echo Chamber",
+    genre: "Thriller",
+    length: 140,
+    score: 8.6,
+    lang: "English",
+    year: 2024,
+    color: "#ab47bc",
+    tagline: "Every secret echoes",
+    director: "S. Iyer",
+    posterUrl: "https://images.unsplash.com/photo-1505685296765-3a2736de412f?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 105,
+    title: "Spice Route",
+    genre: "Adventure",
+    length: 121,
+    score: 7.8,
+    lang: "Malayalam",
+    year: 2021,
+    color: "#ffca28",
+    tagline: "Sail beyond maps",
+    director: "P. Das",
+    posterUrl: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
+  }
 ];
 
 // --- Routes ---
@@ -42,7 +102,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
     service: 'CineLite API',
-    version: '1.0.0',
+    version: '1.1.0',
     timestamp: new Date().toISOString(),
     env: process.env.NODE_ENV || 'development'
   });

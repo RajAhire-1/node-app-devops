@@ -13,6 +13,10 @@ const shutdown = () => {
     console.log('✅ Server closed.');
     process.exit(0);
   });
+  setTimeout(() => {
+    console.error('❌ Force exit after timeout');
+    process.exit(1);
+  }, 10000);
 };
 
 process.on('SIGINT', shutdown);
