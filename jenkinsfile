@@ -2,41 +2,59 @@ pipeline {
     agent any
 
     environment {
-
-        SERVER_IP      = '172.31.7.249'
-        SSH_CREDENTIAL = 'node-app-key'
+        // 🧠 --- Configuration variables ---
+        SERVER_IP      = '172.31.7.249'            // your EC2 server
+        SSH_CREDENTIAL = 'node-app-key'            // Jenkins SSH key ID
         REPO_URL       = 'https://github.com/RajAhire-1/node-app-devops.git'
         BRANCH         = 'main'
         REMOTE_USER    = 'ubuntu'
         REMOTE_PATH    = '/home/ubuntu/node-app'
+
+        // optional customizations
+        NODE_ENV       = 'production'
+        APP_NAME       = 'cinelite-app'
     }
 
     stages {
-        stage('Clone Repository') {
+
+        stage('Checkout Code') {
             steps {
+                echo '📦 Cloning repository...'
                 git branch: "${BRANCH}", url: "${REPO_URL}"
             }
         }
 
-        stage('Upload Files to EC2') {
+        stage('Install Dependencies (Local Test)') {
             steps {
-                sshagent([SSH_CREDENTIAL]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} 'mkdir -p ${REMOTE_PATH}'
-                        scp -o StrictHostKeyChecking=no -r * ${REMOTE_USER}@${SERVER_IP}:${REMOTE_PATH}/
-                    """
-                }
+                echo '📦 Installing Node dependencies (for lint/test)...'
+                sh 'npm install'
             }
         }
 
-        stage('Install Dependencies & Start App') {
+        stage('Run Lint / Build Checks') {
             steps {
+                echo '🧪 Running code checks...'
+                // (optional) Add real commands if you have ESLint / tests
+                sh 'echo "No tests defined. Skipping..."'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                echo "🚀 Uploading and deploying app to ${SERVER_IP}"
                 sshagent([SSH_CREDENTIAL]) {
                     sh """
+                        # create remote directory
+                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} 'mkdir -p ${REMOTE_PATH}'
+
+                        # copy project files
+                        scp -o StrictHostKeyChecking=no -r * ${REMOTE_USER}@${SERVER_IP}:${REMOTE_PATH}/
+
+                        # install dependencies & restart app
                         ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} '
                             cd ${REMOTE_PATH} &&
-                            npm install &&
-                            pm2 start app.js --name node-app || pm2 restart node-app
+                            npm install --omit=dev &&
+                            pm2 start start.js --name ${APP_NAME} || pm2 restart ${APP_NAME}
                         '
                     """
                 }
@@ -46,11 +64,13 @@ pipeline {
 
     post {
         success {
-            echo '✅ Application deployed successfully!'
+            echo '✅ Application deployed successfully to EC2!'
         }
         failure {
-            echo '❌ Deployment failed.'
+            echo '❌ Deployment failed. Check Jenkins logs.'
+        }
+        always {
+            echo '📜 Pipeline completed.'
         }
     }
 }
-
